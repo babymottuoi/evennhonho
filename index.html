@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>even 1k tv</title>
+    <title>Event 1k tv</title>
     <style>
         :root {
             --dtu-red: #8b0000;
@@ -149,10 +149,10 @@
         let myQuestions = [], currentIdx = 0, score = 0, startTime;
 
         // --- LOGIC BẢO MẬT ---
-        document.addEventListener('keydown', e => {
+        document.addEventtListener('keydown', e => {
             // Chặn F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C, Ctrl+V, Ctrl+X
             if (e.keyCode == 123 || (e.ctrlKey && [67, 86, 85, 83, 73, 74, 88].includes(e.keyCode))) {
-                e.preventDefault();
+                e.prEventtDefault();
                 return false;
             }
         });
