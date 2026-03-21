@@ -43,21 +43,14 @@
 
     <script>  
         const tg = window.Telegram.WebApp;
-        
-        // 1. Kiểm tra nộp trùng ngay lập tức
-        if (localStorage.getItem('dtu_event_submitted')) {
-            tg.ready();
-            alert("Hệ thống ghi nhận bạn đã hoàn thành bài thi này.");
-            tg.close();
-        }
-
         tg.expand();
     
         const CONFIG = {
+            // Nhớ thay URL Apps Script của bạn vào đây
             SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxwwFu5vCxP-gmaJ0bd5OHxCkeEfEemIRwLwVGE2cNIqMagIiskU19YfZzNttdOJVHa/exec",
             START_TIME: new Date("2026-03-22T02:30:00+07:00").getTime(),
-            END_TIME: new Date("2026-03-22T03:00:00+07:00").getTime(),
-            NUM_QUESTIONS: 4 // số câu hỏi ngẫu nhiên
+            END_TIME: new Date("2026-03-22T04:00:00+07:00").getTime(), // Đã nới thêm giờ để bạn test
+            NUM_QUESTIONS: 4 
         };
 
      const BANK = [
@@ -112,8 +105,17 @@
                 btnStart.disabled = false;
                 btnStart.innerText = "BẮT ĐẦU THI NGAY";
                 nameInput.style.display = "block";
-                if(!infoText.innerText.includes("Chào")) {
+
+                let timeLeft = CONFIG.END_TIME - now;
+                let mLeft = Math.floor(timeLeft / 60000);
+                let sLeft = Math.floor((timeLeft % 60000) / 1000);
+
+                if (mLeft < 5) {
+                    infoText.style.color = "red";
+                    infoText.innerText = `⚠️ SẮP HẾT GIỜ! Còn ${mLeft}p ${sLeft}s.`;
+                } else if(!infoText.innerText.includes("Chào")) {
                     infoText.innerText = tg.initDataUnsafe.user ? `Chào: ${tg.initDataUnsafe.user.first_name}` : "Hệ thống đã sẵn sàng!";
+                    infoText.style.color = "#666";
                 }
             }
         }
@@ -158,7 +160,7 @@
             clearInterval(timerInterval);
             const btnNext = document.getElementById('btn-next');
             btnNext.disabled = true;
-            btnNext.innerText = "ĐANG KIỂM TRA...";
+            btnNext.innerText = "ĐANG NỘP BÀI...";
             
             const timeUsed = ((Date.now() - startTime) / 1000).toFixed(2);
             const payload = {
@@ -177,19 +179,20 @@
                 
                 const result = await response.json();
 
-                if (result.status === "success") {
-                    localStorage.setItem('dtu_event_submitted', 'true');
-                    soundWin.play();
-                    confetti();
-                    document.getElementById('step-quiz').classList.add('hidden');
-                    document.getElementById('step-end').classList.remove('hidden');
-                } else {
-                    throw new Error("Lỗi server");
+                if (result.status === "duplicate") {
+                    alert("Bạn đã nộp bài trước đó rồi! Kết quả cũ vẫn được giữ lại.");
+                    tg.close();
+                    return;
                 }
+
+                soundWin.play();
+                confetti();
+                document.getElementById('step-quiz').classList.add('hidden');
+                document.getElementById('step-end').classList.remove('hidden');
                 
             } catch(e) {
                 console.error(e);
-                alert("Lỗi kết nối! Vui lòng thử nộp lại.");
+                alert("Lỗi kết nối! Vui lòng nhấn Thử lại để nộp bài.");
                 btnNext.disabled = false;
                 btnNext.innerText = "THỬ LẠI";
             }
