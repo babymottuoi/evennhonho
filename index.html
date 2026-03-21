@@ -79,29 +79,37 @@
             document.getElementById('user-info').innerText = `Chào: ${tg.initDataUnsafe.user.first_name} (ID: ${tg.initDataUnsafe.user.id})`;
         }
 
-        function startApp() {
-            const name = document.getElementById('fullname').value.trim();
-            if(!name) return alert("Vui lòng nhập họ tên!");
-            
-            myQuestions = [...BANK].sort(() => 0.5 - Math.random()).slice(0, 50);
-            document.getElementById('step-start').classList.add('hidden');
-            document.getElementById('step-quiz').classList.remove('hidden');
-            
-            startTime = Date.now();
-            timerInterval = setInterval(() => {
-                document.getElementById('clock').innerText = ((Date.now() - startTime)/1000).toFixed(2) + "s";
-            }, 100);
-            render();
-        }
+function startApp() {
+    const name = document.getElementById('fullname').value.trim();
+    if(!name) return alert("Vui lòng nhập họ tên!");
+    
+    // --- CHỈNH SỬA TẠI ĐÂY ---
+    // .sort(() => 0.5 - Math.random()) : Dùng để trộn ngẫu nhiên danh sách câu hỏi
+    // .slice(0, 5) : Thay số 5 bằng số câu bạn muốn thi (ví dụ: 2, 4, hoặc 5)
+    myQuestions = [...BANK].sort(() => 0.4 - Math.random()).slice(0, 4); 
+    
+    document.getElementById('step-start').classList.add('hidden');
+    document.getElementById('step-quiz').classList.remove('hidden');
+    
+    startTime = Date.now();
+    timerInterval = setInterval(() => {
+        document.getElementById('clock').innerText = ((Date.now() - startTime)/1000).toFixed(2) + "s";
+    }, 100);
+    render();
+}
 
-        function render() {
-            const item = myQuestions[currentIdx];
-            let html = `<h3>Câu ${currentIdx + 1}: ${item.q}</h3>`;
-            item.opts.forEach(o => {
-                html += `<label class="option"><input type="radio" name="quiz" value="${o}"> ${o}</label>`;
-            });
-            document.getElementById('quiz-content').innerHTML = html;
-        }
+function render() {
+    const item = myQuestions[currentIdx];
+    
+    // Trộn ngẫu nhiên các phương án trả lời trước khi hiển thị
+    const shuffledOpts = [...item.opts].sort(() => 0.5 - Math.random());
+
+    let html = `<h3>Câu ${currentIdx + 1}/${myQuestions.length}: ${item.q}</h3>`;
+    shuffledOpts.forEach(o => {
+        html += `<label class="option"><input type="radio" name="quiz" value="${o}"> ${o}</label>`;
+    });
+    document.getElementById('quiz-content').innerHTML = html;
+}
 
         function handleNext() {
             const selected = document.querySelector('input[name="quiz"]:checked');
