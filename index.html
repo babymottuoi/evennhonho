@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Event 1k TV - Đại học Duy Tân</title>
+    <style>
+        :root {
+            --dtu-red: #8b0000;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            border-top: 10px solid var(--dtu-red);
+            margin: 15px;
+        }
+
+        .timer {
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 22px;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: var(--dtu-red);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .option {
+            display: block;
+            background: #f9f9f9;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            background: #fff0f0;
+            border-color: var(--dtu-red);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h2 {
+            margin: 10px 0;
+            font-size: 1.4rem;
+        }
+    </style>
+</head>
+
+<body oncontextmenu="return false;">
+    <div class="container" id="main-app">
+        <h2 style="text-align:center; color:var(--dtu-red)">Ai là người may mắn</h2>
+        <p style="text-align:center; color:#555; margin-top:-5px; font-weight: bold;">
+            10 người nhanh nhất nhận thẻ cào Mobi/Viettel
+        </p>
+
+        <div id="countdown" class="timer">Đang kiểm tra thời gian...</div>
+
+        <div id="step-info">
+            <input type="text" id="fullname" placeholder="HỌ VÀ TÊN SINH VIÊN" autocomplete="off">
+            <button id="btn-start" disabled>CHỜ MỞ CỔNG</button>
+        </div>
+
+        <div id="step-quiz" class="hidden">
+            <div id="quiz-area"></div>
+            <button id="btn-next" style="margin-top:20px">TIẾP THEO</button>
+        </div>
+
+        <div id="step-end" class="hidden" style="text-align:center">
+            <h1 style="color: green;">✔️</h1>
+            <h3>ĐÃ GỬI KẾT QUẢ!</h3>
+            <p>Hệ thống đã ghi nhận bài làm của bạn. Kết quả sẽ được công bố sớm nhất.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- CẤU HÌNH ---
+        const CONFIG = {
+            TOKEN: "8627373989:AAFMUvOs14c7XHeuFmVTuVgzr8nLEwCkRBQ",
+            CHAT_ID: "6536042045",
+            // Đặt giờ mở cổng (Ví dụ: 7:50:00 sáng ngày 19/03/2026 giờ VN)
+            OPEN_TIME: new Date("2026-03-21T21:00:00+07:00").getTime(),
+            NUM_QUESTIONS: 2
+        };
+
+        const BANK = [
+            { q: "Đại học Duy Tân thành lập vào ngày tháng năm nào?", opts: ["11/11/1994", "19/05/1994", "02/09/1994", "20/11/1994", "30/04/1994", "15/10/1994"], ans: "11/11/1994" },
+            { q: "Ai là người sáng lập Đại học Duy Tân?", opts: ["NGƯT. Anh hùng Lao động Lê Công Cơ", "GS. Ngô Bảo Châu", "TS. Lê Nguyên Bảo", "Ông Huỳnh Cách Mạng", "Bà Nguyễn Thị Bình", "Ông Nguyễn Xuân Phúc"], ans: "NGƯT. Anh hùng Lao động Lê Công Cơ" },
+            { q: "DTU đạt chuẩn kiểm định ABET (Mỹ) cho khối ngành nào đầu tiên?", opts: ["Công nghệ Thông tin", "Du lịch", "Y dược", "Kiến trúc", "Ngôn ngữ Anh", "Luật"], ans: "Công nghệ Thông tin" },
+            { q: "Biểu tượng (Logo) của DTU có hình ảnh gì chủ đạo?", opts: ["Ngọn đuốc", "Quyển sách", "Chim lạc", "Bản đồ Việt Nam", "Cánh én", "Cánh chim"], ans: "Ngọn đuốc" },
+            { q: "Năm 2026, DTU nằm trong top bao nhiêu của BXH QS World University Rankings?", opts: ["Top 500", "Top 100", "Top 1000", "Top 10", "Top 2000", "Top 50"], ans: "Top 500" },
+            { q: "Địa chỉ cơ sở của DTU tại Hòa Khánh là đường nào?", opts: ["Nguyễn Lương Bằng", "110 Hoàng Minh Thảo", "100 Hoàng Minh Thảo", "Tôn Đức Thắng", "120 Hoàng Minh Thảo", "Nguyễn Tất Thành"], ans: "120 Hoàng Minh Thảo" },
+            { q: "Tên gọi 'Duy Tân' được lấy cảm hứng từ phong trào lịch sử nào?", opts: ["Phong trào Duy Tân", "Phong trào Cần Vương", "Phong trào Đông Du", "Khởi nghĩa Yên Thế", "Xô Viết Nghệ Tĩnh", "Cách mạng Tháng 8"], ans: "Phong trào Duy Tân" },
+            { q: "Hiệu trưởng hiện nay (năm 2026) của Đại học Duy Tân là ai?", opts: ["TS. Lê Nguyên Bảo", "NGƯT. Lê Công Cơ", "GS. Trần Diệp Tuấn", "TS. Võ Thanh Hải", "TS. Nguyễn Hữu Phú", "GS. Lim Sang Taek"], ans: "TS. Lê Nguyên Bảo" },
+            { q: "Cơ sở đào tạo Y Dược của DTU nằm ở cơ sở nào?", opts: ["K7/25 Quang Trung", "03 Quang Trung", "254 Nguyễn Văn Linh", "209 Phan Thanh", "3.5ha Hòa Khánh Nam"], ans: "3.5ha Hòa Khánh Nam" },
+            { q: "DTU có bao nhiêu cơ sở đào tạo tại Đà Nẵng tính đến 2026?", opts: ["5 cơ sở", "3 cơ sở", "6 cơ sở", "2 cơ sở", "7 cơ sở", "4 cơ sở"], ans: "7 cơ sở" },
+            { q: "Khẩu hiệu (Slogan) của Đại học Duy Tân là gì?", opts: ["Tất cả vì quyền lợi học tập và việc làm của sinh viên", "Chất lượng là danh dự", "Học tập để phục vụ", "Vươn ra thế giới", "Đổi mới và sáng tạo", "Hợp tác cùng phát triển"], ans: "Tất cả vì quyền lợi học tập và việc làm của sinh viên" },
+            { q: "Tạp chí khoa học của DTU có tên là gì?", opts: ["DTU Journal of Science and Technology", "Duy Tan News", "Khoa học & Đời sống", "Tạp chí Giáo dục", "Tạp chí Kinh tế", "Tạp chí Công nghệ"], ans: "DTU Journal of Science and Technology" },
+            { q: "Sân bóng đá của DTU nằm ở cơ sở nào?", opts: ["Cơ sở Hòa Khánh", "Cơ sở Phan Thanh", "Cơ sở Quang Trung", "Cơ sở Nguyễn Văn Linh", "Cơ sở Phan Thanh", "Cơ sở Phan Văn Trị"], ans: "Cơ sở Hòa Khánh" },
+            { q: "Ngành học nào sau đây tại DTU có hợp tác với Đại học Carnegie Mellon (CMU)?", opts: ["Công nghệ phần mềm", "Kế toán", "Luật", "Y đa khoa", "Kiến trúc", "Xây dựng"], ans: "Công nghệ phần mềm" },
+            { q: "DTU đạt giải Nhất cuộc thi CDIO Academy quốc tế lần đầu vào năm nào?", opts: ["2013", "2010", "2015", "2018", "2020", "2024"], ans: "2013" },
+            { q: "Cơ sở Quang Trung của DTU nằm gần địa danh nào nhất?", opts: ["Ga Đà Nẵng", "Cầu Rồng", "Sân bay Đà Nẵng", "Cầu sông Hàn", "Biển Mỹ Khê", "Bán đảo Sơn Trà"], ans: "Cầu sông Hàn" },
+            { q: "Hệ đào tạo từ xa của DTU có tên là gì?", opts: ["eDTU", "Duy Tan Online", "DTU Distance Learning", "DTU-eUni", "Global DTU", "Open DTU"], ans: "DTU-eUni" },
+            { q: "DTU chính thức nhận Huân chương Lao động hạng Nhất vào năm nào?", opts: ["2019", "2014", "2024", "2009", "1999", "2025"], ans: "2019" },
+            { q: "Thư viện điện tử của DTU cung cấp quyền truy cập vào cơ sở dữ liệu nào?", opts: ["SpringerLink", "Netflix", "Facebook", "Wikipedia", "Youtube", "Tiktok"], ans: "SpringerLink" },
+            { q: "Màu sắc truyền thống nhận diện thương hiệu DTU là màu gì?", opts: ["Đỏ đô", "Đỏ thẳm", "Đỏ", "Xanh lá", "Tím", "Cam"], ans: "Đỏ đô" }
+        ];
+
+        let myQuestions = [], currentIdx = 0, score = 0, startTime;
+        let isSubmitting = false;
+
+        // --- BẢO MẬT ---
+        document.addEventListener('keydown', e => {
+            if (e.keyCode == 123 || (e.ctrlKey && [67, 86, 85, 83, 73, 74, 88].includes(e.keyCode))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // --- ĐẾM NGƯỢC ---
+        const timerCheck = setInterval(() => {
+            const now = Date.now();
+            const btnStart = document.getElementById('btn-start');
+
+            if (localStorage.getItem('dtu_quiz_final')) {
+                document.getElementById('countdown').innerText = "BẠN ĐÃ THAM GIA";
+                btnStart.style.display = 'none';
+                clearInterval(timerCheck);
+                return;
+            }
+
+            if (now >= CONFIG.OPEN_TIME) {
+                btnStart.disabled = false;
+                btnStart.innerText = "BẮT ĐẦU THI NGAY";
+                document.getElementById('countdown').innerText = "HỆ THỐNG ĐÃ MỞ";
+                clearInterval(timerCheck);
+            } else {
+                let diff = CONFIG.OPEN_TIME - now;
+                let m = Math.floor(diff / 60000);
+                let s = Math.floor((diff % 60000) / 1000);
+                document.getElementById('countdown').innerText = `MỞ SAU: ${m}p ${s}s`;
+            }
+        }, 1000);
+
+        // --- LOGIC THI ---
+        document.getElementById('btn-start').onclick = () => {
+            const name = document.getElementById('fullname').value.trim();
+            if (!name) return alert("Vui lòng nhập họ tên sinh viên!");
+
+            myQuestions = [...BANK].sort(() => 0.5 - Math.random()).slice(0, CONFIG.NUM_QUESTIONS);
+            startTime = Date.now();
+
+            document.getElementById('step-info').classList.add('hidden');
+            document.getElementById('step-quiz').classList.remove('hidden');
+            render();
+        };
+
+        function render() {
+            const item = myQuestions[currentIdx];
+            const shuffledOpts = [...item.opts].sort(() => 0.5 - Math.random());
+
+            let html = `<p style="font-size:18px"><b>Câu ${currentIdx + 1}:</b> ${item.q}</p>`;
+            shuffledOpts.forEach(o => {
+                html += `<label class="option"><input type="radio" name="quiz_opt" value="${o}"> ${o}</label>`;
+            });
+
+            document.getElementById('quiz-area').innerHTML = html;
+            document.getElementById('btn-next').innerText = (currentIdx === CONFIG.NUM_QUESTIONS - 1) ? "NỘP BÀI" : "TIẾP THEO";
+        }
+
+        document.getElementById('btn-next').onclick = () => {
+            const selected = document.querySelector('input[name="quiz_opt"]:checked');
+            if (!selected) return alert("Hãy chọn một đáp án!");
+
+            if (selected.value === myQuestions[currentIdx].ans) score++;
+
+            if (currentIdx < CONFIG.NUM_QUESTIONS - 1) {
+                currentIdx++;
+                render();
+            } else {
+                submitFinal();
+            }
+        };
+
+async function submitFinal() {
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    const btnNext = document.getElementById('btn-next');
+    btnNext.disabled = true;
+    btnNext.innerText = "ĐANG GỬI...";
+
+    const timeUsed = ((Date.now() - startTime) / 1000).toFixed(2);
+    const studentName = document.getElementById('fullname').value.toUpperCase();
+
+    // --- ĐOẠN LẤY THÔNG TIN TELEGRAM ---
+    const webapp = window.Telegram.WebApp;
+    webapp.expand(); // Mở rộng giao diện tối đa
+    
+    const user = webapp.initDataUnsafe?.user;
+    const tgId = user ? user.id : "Không lấy được ID";
+    const tgUser = user ? (user.username ? `@${user.username}` : "Không có username") : "N/A";
+    const fullNameTg = user ? `${user.first_name} ${user.last_name || ''}` : "N/A";
+    // ----------------------------------
+
+    // Cập nhật nội dung tin nhắn gửi về Bot (Thêm ID và Username)
+    const message = `🏆 **KẾT QUẢ MỚI**\n` +
+                    `🆔 **Telegram ID:** \`${tgId}\`\n` +
+                    `👤 **Tài khoản:** ${tgUser} (${fullNameTg})\n` +
+                    `📝 **Họ tên SV:** ${studentName}\n` +
+                    `✅ **Đúng:** ${score}/${CONFIG.NUM_QUESTIONS}\n` +
+                    `⏱️ **Thời gian:** ${timeUsed} giây`;
+
+    try {
+        const res = await fetch(`https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CONFIG.CHAT_ID,
+                text: message,
+                parse_mode: 'Markdown'
+            })
+        });
+
+        if (res.ok) {
+            localStorage.setItem('dtu_quiz_final', '1');
+            document.getElementById('step-quiz').classList.add('hidden');
+            document.getElementById('step-end').classList.remove('hidden');
+            document.getElementById('countdown').innerText = "HOÀN THÀNH";
+            
+            // Tùy chọn: Tự động đóng Web App sau khi nộp thành công
+            // setTimeout(() => webapp.close(), 3000); 
+        } else {
+            throw new Error();
+        }
+    } catch (err) {
+        alert("Gửi bài thất bại. Vui lòng kiểm tra mạng và thử lại!");
+        isSubmitting = false;
+        btnNext.disabled = false;
+        btnNext.innerText = "NỘP BÀI";
+    }
+}
+    </script>
+</body>
+
+</html>
