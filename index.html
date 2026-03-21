@@ -43,10 +43,14 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        // --- THAY LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwwFu5vCxP-gmaJ0bd5OHxCkeEfEemIRwLwVGE2cNIqMagIiskU19YfZzNttdOJVHa/exec"; 
-        
+    
+        const CONFIG = {
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxwwFu5vCxP-gmaJ0bd5OHxCkeEfEemIRwLwVGE2cNIqMagIiskU19YfZzNttdOJVHa/exec",
+            // Ví dụ: Mở lúc 7:00 và Đóng lúc 11:00 ngày 22/03/2026 (Giờ VN)
+            START_TIME: new Date("2026-03-22T02:30:00+07:00").getTime(),
+            END_TIME: new Date("2026-03-22T03:00:00+07:00").getTime(),
+            NUM_QUESTIONS: 50
+        };
         const soundWin = new Audio('https://www.myinstants.com/media/sounds/tada.mp3');
         let score = 0, currentIdx = 0, startTime, timerInterval;
         let myQuestions = [];
@@ -149,6 +153,36 @@ function render() {
                 alert("Lỗi kết nối hệ thống!");
             }
         }
+        function checkSystemStatus() {
+    const now = Date.now();
+    const btnStart = document.querySelector("#step-start .btn");
+    const infoText = document.getElementById('user-info');
+
+    if (now < CONFIG.START_TIME) {
+        // CHƯA ĐẾN GIỜ
+        btnStart.disabled = true;
+        btnStart.innerText = "CHƯA ĐẾN GIỜ THI";
+        let diff = CONFIG.START_TIME - now;
+        let m = Math.floor(diff / 60000);
+        let s = Math.floor((diff % 60000) / 1000);
+        infoText.innerText = `Hệ thống sẽ mở sau: ${m}phút ${s}giây`;
+    } 
+    else if (now > CONFIG.END_TIME) {
+        // ĐÃ HẾT GIỜ
+        btnStart.disabled = true;
+        btnStart.innerText = "HỆ THỐNG ĐÃ ĐÓNG";
+        infoText.innerText = "Thời gian làm bài đã kết thúc. Hẹn gặp bạn ở event sau!";
+    } 
+    else {
+        // ĐANG TRONG GIỜ THI
+        btnStart.disabled = false;
+        btnStart.innerText = "BẮT ĐẦU THI NGAY";
+        infoText.innerText = "Hệ thống đang mở. Chúc bạn thi tốt!";
+    }
+}
+
+// Chạy kiểm tra mỗi giây một lần
+setInterval(checkSystemStatus, 1000);
     </script>
 </body>
 </html>
