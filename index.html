@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Duy Tân - Full Version</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root { --dtu-red: #8b0000; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 450px; border-top: 10px solid var(--dtu-red); margin: 15px; position: relative; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .user-info { background: #fff3f3; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85em; border-left: 4px solid var(--dtu-red); line-height: 1.5; }
+        .timer { color: #d32f2f; font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 1.2em; background: #ffeeee; padding: 8px; border-radius: 8px; }
+        .hidden { display: none; }
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; background: var(--dtu-red); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .option-label { display: block; padding: 12px; background: #f9f9f9; margin-bottom: 8px; border-radius: 6px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
+        .option-label:hover { background: #fff0f0; border-color: var(--dtu-red); }
+        h3 { font-size: 1.1em; line-height: 1.4; color: #333; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div class="container">
+        <div class="header">
+            <h2 style="color:var(--dtu-red); margin:0;">AI LÀ NGƯỜI MAY MẮN</h2>
+            <p id="welcome-msg" style="font-size:0.9em; color:#666; font-weight:bold;">Đại học Duy Tân</p>
+        </div>
+
+        <div id="tg-display" class="user-info">Đang xác thực tài khoản Telegram...</div>
+
+        <div id="step-start">
+            <input type="text" id="fullname" placeholder="HỌ VÀ TÊN SINH VIÊN" autocomplete="off">
+            <button class="btn" id="btn-begin" onclick="startQuiz()">BẮT ĐẦU THI NGAY</button>
+        </div>
+
+        <div id="step-quiz" class="hidden">
+            <div class="timer" id="clock">ĐANG LÀM BÀI...</div>
+            <div id="quiz-area"></div>
+            <button class="btn" id="btn-next" style="margin-top:15px;" onclick="handleNext()">TIẾP THEO</button>
+        </div>
+
+        <div id="step-end" class="hidden" style="text-align:center;">
+            <div style="font-size: 60px;">🎉</div>
+            <h2 style="color: green; margin-top:0;">THÀNH CÔNG!</h2>
+            <p>Hệ thống đã ghi nhận kết quả của bạn.<br>Chúc bạn là người may mắn nhất!</p>
+            <button class="btn" onclick="window.Telegram.WebApp.close()">ĐÓNG ỨNG DỤNG</button>
+        </div>
+    </div>
+
+    <script>
+        // Âm thanh
+        const soundCorrect = new Audio('https://www.soundjay.com/buttons/sounds/button-37a.mp3'); 
+        const soundWin = new Audio('https://www.myinstants.com/media/sounds/tada.mp3');
+
+        const CONFIG = {
+            TOKEN: '8627373989:AAFMUvOs14c7XHeuFmVTuVgzr8nLEwCkRBQ', 
+            CHAT_ID: '6536042045',
+            NUM_QUESTIONS: 4 // Bạn có thể chỉnh số lượng câu hỏi mỗi lượt thi ở đây
+        };
+
+        const BANK = [
+            { q: "Đại học Duy Tân thành lập vào ngày tháng năm nào?", opts: ["11/11/1994", "19/05/1994", "02/09/1994", "20/11/1994", "30/04/1994", "15/10/1994"], ans: "11/11/1994" },
+            { q: "Ai là người sáng lập Đại học Duy Tân?", opts: ["NGƯT. Anh hùng Lao động Lê Công Cơ", "GS. Ngô Bảo Châu", "TS. Lê Nguyên Bảo", "Ông Huỳnh Cách Mạng", "Bà Nguyễn Thị Bình", "Ông Nguyễn Xuân Phúc"], ans: "NGƯT. Anh hùng Lao động Lê Công Cơ" },
+            { q: "DTU đạt chuẩn kiểm định ABET (Mỹ) cho khối ngành nào đầu tiên?", opts: ["Công nghệ Thông tin", "Du lịch", "Y dược", "Kiến trúc", "Ngôn ngữ Anh", "Luật"], ans: "Công nghệ Thông tin" },
+            { q: "Biểu tượng (Logo) của DTU có hình ảnh gì chủ đạo?", opts: ["Ngọn đuốc", "Quyển sách", "Chim lạc", "Bản đồ Việt Nam", "Cánh én", "Cánh chim"], ans: "Ngọn đuốc" },
+            { q: "Năm 2026, DTU nằm trong top bao nhiêu của BXH QS World University Rankings?", opts: ["Top 500", "Top 100", "Top 1000", "Top 10", "Top 2000", "Top 50"], ans: "Top 500" },
+            { q: "Địa chỉ cơ sở của DTU tại Hòa Khánh là đường nào?", opts: ["Nguyễn Lương Bằng", "110 Hoàng Minh Thảo", "100 Hoàng Minh Thảo", "Tôn Đức Thắng", "120 Hoàng Minh Thảo", "Nguyễn Tất Thành"], ans: "120 Hoàng Minh Thảo" },
+            { q: "Tên gọi 'Duy Tân' được lấy cảm hứng từ phong trào lịch sử nào?", opts: ["Phong trào Duy Tân", "Phong trào Cần Vương", "Phong trào Đông Du", "Khởi nghĩa Yên Thế", "Xô Viết Nghệ Tĩnh", "Cách mạng Tháng 8"], ans: "Phong trào Duy Tân" },
+            { q: "Hiệu trưởng hiện nay (năm 2026) của Đại học Duy Tân là ai?", opts: ["TS. Lê Nguyên Bảo", "NGƯT. Lê Công Cơ", "GS. Trần Diệp Tuấn", "TS. Võ Thanh Hải", "TS. Nguyễn Hữu Phú", "GS. Lim Sang Taek"], ans: "TS. Lê Nguyên Bảo" },
+            { q: "Cơ sở đào tạo Y Dược của DTU nằm ở cơ sở nào?", opts: ["K7/25 Quang Trung", "03 Quang Trung", "254 Nguyễn Văn Linh", "209 Phan Thanh", "3.5ha Hòa Khánh Nam"], ans: "3.5ha Hòa Khánh Nam" },
+            { q: "DTU có bao nhiêu cơ sở đào tạo tại Đà Nẵng tính đến 2026?", opts: ["5 cơ sở", "3 cơ sở", "6 cơ sở", "2 cơ sở", "7 cơ sở", "4 cơ sở"], ans: "7 cơ sở" },
+            { q: "Khẩu hiệu (Slogan) của Đại học Duy Tân là gì?", opts: ["Tất cả vì quyền lợi học tập và việc làm của sinh viên", "Chất lượng là danh dự", "Học tập để phục vụ", "Vươn ra thế giới", "Đổi mới và sáng tạo", "Hợp tác cùng phát triển"], ans: "Tất cả vì quyền lợi học tập và việc làm của sinh viên" },
+            { q: "Tạp chí khoa học của DTU có tên là gì?", opts: ["DTU Journal of Science and Technology", "Duy Tan News", "Khoa học & Đời sống", "Tạp chí Giáo dục", "Tạp chí Kinh tế", "Tạp chí Công nghệ"], ans: "DTU Journal of Science and Technology" },
+            { q: "Sân bóng đá của DTU nằm ở cơ sở nào?", opts: ["Cơ sở Hòa Khánh", "Cơ sở Phan Thanh", "Cơ sở Quang Trung", "Cơ sở Nguyễn Văn Linh", "Cơ sở Phan Thanh", "Cơ sở Phan Văn Trị"], ans: "Cơ sở Hòa Khánh" },
+            { q: "Ngành học nào sau đây tại DTU có hợp tác với Đại học Carnegie Mellon (CMU)?", opts: ["Công nghệ phần mềm", "Kế toán", "Luật", "Y đa khoa", "Kiến trúc", "Xây dựng"], ans: "Công nghệ phần mềm" },
+            { q: "DTU đạt giải Nhất cuộc thi CDIO Academy quốc tế lần đầu vào năm nào?", opts: ["2013", "2010", "2015", "2018", "2020", "2024"], ans: "2013" },
+            { q: "Cơ sở Quang Trung của DTU nằm gần địa danh nào nhất?", opts: ["Ga Đà Nẵng", "Cầu Rồng", "Sân bay Đà Nẵng", "Cầu sông Hàn", "Biển Mỹ Khê", "Bán đảo Sơn Trà"], ans: "Cầu sông Hàn" },
+            { q: "Hệ đào tạo từ xa của DTU có tên là gì?", opts: ["eDTU", "Duy Tan Online", "DTU Distance Learning", "DTU-eUni", "Global DTU", "Open DTU"], ans: "DTU-eUni" },
+            { q: "DTU chính thức nhận Huân chương Lao động hạng Nhất vào năm nào?", opts: ["2019", "2014", "2024", "2009", "1999", "2025"], ans: "2019" },
+            { q: "Thư viện điện tử của DTU cung cấp quyền truy cập vào cơ sở dữ liệu nào?", opts: ["SpringerLink", "Netflix", "Facebook", "Wikipedia", "Youtube", "Tiktok"], ans: "SpringerLink" },
+            { q: "Màu sắc truyền thống nhận diện thương hiệu DTU là màu gì?", opts: ["Đỏ đô", "Đỏ thẳm", "Đỏ", "Xanh lá", "Tím", "Cam"], ans: "Đỏ đô" }
+        ];
+
+        let myQuestions = [], currentIdx = 0, score = 0, startTime, isSubmitting = false;
+
+        const webapp = window.Telegram.WebApp;
+        webapp.ready();
+        const user = webapp.initDataUnsafe?.user;
+
+        if (user) {
+            document.getElementById('tg-display').innerHTML = `🆔 ID: <b>${user.id}</b><br>👤 Telegram: <b>${user.username || user.first_name}</b>`;
+            document.getElementById('welcome-msg').innerText = `Chào mừng ${user.first_name} tham gia!`;
+        }
+
+        function startQuiz() {
+            const name = document.getElementById('fullname').value.trim();
+            if (!name) return alert("Vui lòng nhập họ tên sinh viên!");
+
+            // Trộn câu hỏi ngẫu nhiên từ ngân hàng câu hỏi
+            myQuestions = [...BANK].sort(() => 0.5 - Math.random()).slice(0, CONFIG.NUM_QUESTIONS);
+            
+            document.getElementById('step-start').className = 'hidden';
+            document.getElementById('step-quiz').className = '';
+            startTime = Date.now();
+            render();
+        }
+
+        function render() {
+            const item = myQuestions[currentIdx];
+            const shuffledOpts = [...item.opts].sort(() => 0.5 - Math.random());
+
+            let html = `<h3>Câu ${currentIdx + 1}/${CONFIG.NUM_QUESTIONS}: ${item.q}</h3>`;
+            shuffledOpts.forEach(o => {
+                html += `<label class="option-label"><input type="radio" name="quiz_opt" value="${o}"> ${o}</label>`;
+            });
+
+            document.getElementById('quiz-area').innerHTML = html;
+            document.getElementById('btn-next').innerText = (currentIdx === CONFIG.NUM_QUESTIONS - 1) ? "NỘP BÀI" : "TIẾP THEO";
+        }
+
+        function handleNext() {
+            const selected = document.querySelector('input[name="quiz_opt"]:checked');
+            if (!selected) return alert("Hãy chọn một đáp án!");
+
+            if (selected.value === myQuestions[currentIdx].ans) {
+                score++;
+                soundCorrect.play();
+            }
+
+            if (currentIdx < CONFIG.NUM_QUESTIONS - 1) {
+                currentIdx++;
+                render();
+            } else {
+                submitFinal();
+            }
+        }
+
+        async function submitFinal() {
+            if (isSubmitting) return;
+            isSubmitting = true;
+            document.getElementById('btn-next').disabled = true;
+            document.getElementById('btn-next').innerText = "ĐANG GỬI...";
+
+            const timeUsed = ((Date.now() - startTime) / 1000).toFixed(2);
+            const studentName = document.getElementById('fullname').value.toUpperCase();
+
+            const message = `🏆 **KẾT QUẢ MỚI**\n` +
+                            `🆔 ID: \`${user?.id || 'N/A'}\`\n` +
+                            `👤 User: ${user?.username ? '@'+user.username : user?.first_name || 'N/A'}\n` +
+                            `📝 SV: ${studentName}\n` +
+                            `✅ Đúng: ${score}/${CONFIG.NUM_QUESTIONS}\n` +
+                            `⏱️ Thời gian: ${timeUsed} giây`;
+
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${CONFIG.TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CONFIG.CHAT_ID, text: message, parse_mode: 'Markdown' })
+                });
+
+                if (res.ok) {
+                    soundWin.play();
+                    fireworks();
+                    document.getElementById('step-quiz').className = 'hidden';
+                    document.getElementById('step-end').className = '';
+                } else { throw new Error(); }
+            } catch (err) {
+                alert("Lỗi kết nối. Vui lòng thử lại!");
+                isSubmitting = false;
+                document.getElementById('btn-next').disabled = false;
+            }
+        }
+
+        function fireworks() {
+            var end = Date.now() + (3 * 1000);
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#8b0000', '#ffffff'] });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#8b0000', '#ffffff'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+    </script>
+</body>
+</html>
