@@ -1,59 +1,210 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Event Duy Tân 2026</title>
+    <title>Event kênh</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --dtu: #8b0000; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { background: white; width: 90%; max-width: 420px; padding: 25px; border-radius: 15px; border-top: 10px solid var(--dtu); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .btn { width: 100%; padding: 15px; background: var(--dtu); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-        .option { display: block; padding: 12px; margin: 10px 0; background: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
-        .hidden { display: none; }
-        .timer { text-align: center; color: #d32f2f; font-weight: bold; font-size: 22px; margin-bottom: 15px; background: #ffebee; padding: 10px; border-radius: 8px; }
-        input[type="text"] { width: 100%; padding: 12px; box-sizing: border-box; border: 2px solid #ddd; border-radius: 6px; margin-bottom: 15px; font-size: 16px; }
+        :root {
+            --dtu: #8b0000;
+        }
+
+        /* CĂN CHỈNH TOÀN MÀN HÌNH */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Chống tràn ngang */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* CONTAINER TỰ CO GIÃN */
+        .container {
+            background: white;
+            width: 92%;
+            /* Chiếm 92% chiều rộng màn hình mobile */
+            max-width: 500px;
+            /* Không quá rộng trên PC */
+            padding: 20px;
+            border-radius: 15px;
+            border-top: 8px solid var(--dtu);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            /* Quan trọng để padding không làm tràn khung */
+        }
+
+        /* TIÊU ĐỀ */
+        h2 {
+            font-size: 1.5rem;
+            color: var(--dtu);
+            text-align: center;
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        /* NÚT BẤM */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--dtu);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+        }
+
+        /* CÁC Ô LỰA CHỌN CÂU HỎI */
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            word-break: break-word;
+            /* Tự xuống dòng nếu nội dung quá dài */
+        }
+
+        .option input {
+            margin-right: 10px;
+            min-width: 18px;
+            min-height: 18px;
+        }
+
+        /* FORM NHẬP LIỆU */
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--dtu);
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #555;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .timer {
+            text-align: center;
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        /* ĐIỀU CHỈNH RIÊNG CHO MÀN HÌNH CỰC NHỎ */
+        @media (max-width: 350px) {
+            .container {
+                padding: 15px;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
-<body oncontextmenu="return false;">
+
+<body oncontextmenu="return false;" ondragstart="return false;">
     <div class="container">
         <div id="step-start">
-            <h2 style="color:var(--dtu); text-align:center">AI LÀ NGƯỜI MAY MẮN</h2>
-            <p id="user-info" style="text-align:center; font-size: 14px; color: #666; min-height: 20px;"></p>
-            <input type="text" id="fullname" placeholder="HỌ VÀ TÊN SINH VIÊN" autocomplete="off">
+            <h2>Event kênh🎓DTU Official Community🗂</h2>
+            <p id="system-msg" style="text-align:center; font-size: 0.9rem; color: #666; font-weight: bold;"></p>
+            <div id="form-input">
+                <label>Họ và tên:</label>
+                <input type="text" id="fullname" placeholder="Nguyễn Văn A" autocomplete="off"
+                    oninput="formatName(this)">
+                <label>Mã số sinh viên (MSSV):</label>
+                <input type="text" id="mssv" placeholder="Nhập mã số sinh viên" maxlength="15"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')" autocomplete="off">
+                <label>Username Telegram:</label>
+                <input type="text" id="user_input" value="@" autocomplete="off" oninput="fixUsername(this)">
+                <label>Nhà mạng nhận thưởng:</label>
+                <select id="provider">
+                    <option value="" disabled selected>-- Chọn nhà mạng --</option>
+                    <option value="Viettel">Viettel</option>
+                    <option value="Vinaphone">Vinaphone</option>
+                    <option value="Mobifone">Mobifone</option>
+                </select>
+            </div>
             <button class="btn" id="btn-main-action" onclick="startApp()">ĐANG KIỂM TRA...</button>
         </div>
 
         <div id="step-quiz" class="hidden">
             <div class="timer" id="clock">0.00s</div>
             <div id="quiz-content"></div>
-            <button class="btn" id="btn-next" style="margin-top:15px" onclick="handleNext()">TIẾP THEO</button>
+            <button class="btn" id="btn-next" onclick="handleNext()">TIẾP THEO</button>
         </div>
 
         <div id="step-end" class="hidden" style="text-align:center">
-            <h1 style="font-size: 60px; margin: 0;">🎉</h1>
+            <h1 style="font-size: 4rem; margin: 0;">🎉</h1>
             <h2 style="color: green;">NỘP BÀI THÀNH CÔNG!</h2>
-            <p>Kết quả đang được hệ thống xử lý...</p>
             <button class="btn" onclick="tg.close()">ĐÓNG ỨNG DỤNG</button>
         </div>
     </div>
 
-    <script>  
+    <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-    
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+
         const CONFIG = {
-            // Nhớ thay URL Apps Script của bạn vào đây
-            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxaB4vNZifzI_z9y8cORks9Sq1phC3qR5CE6ofmmd60gdzUNVkC0qjIqXaxhEQZSUQb/exec",
-            START_TIME: new Date("2026-03-22T02:30:00+07:00").getTime(),
-            END_TIME: new Date("2026-03-22T04:00:00+07:00").getTime(), // Đã nới thêm giờ để bạn test
-            NUM_QUESTIONS: 4 
+            SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwfKG2imb8_m0sAb0kNynV-H6VvnaYv2FU1g63Lw4MJ2FIwLEz9S6OW6_CF3seyhbBx/exec",
+            START_TIME: 0, END_TIME: 0, NUM_QUESTIONS: 4
         };
 
-     const BANK = [
+        const soundWin = new Audio('https://www.myinstants.com/media/sounds/tada.mp3');
+        const BANK = [
             { q: "Đại học Duy Tân thành lập vào ngày tháng năm nào?", opts: ["11/11/1994", "19/05/1994", "02/09/1994", "20/11/1994", "30/04/1994", "15/10/1994"], ans: "11/11/1994" },
             { q: "Ai là người sáng lập Đại học Duy Tân?", opts: ["NGƯT. Anh hùng Lao động Lê Công Cơ", "GS. Ngô Bảo Châu", "TS. Lê Nguyên Bảo", "Ông Huỳnh Cách Mạng", "Bà Nguyễn Thị Bình", "Ông Nguyễn Xuân Phúc"], ans: "NGƯT. Anh hùng Lao động Lê Công Cơ" },
             { q: "DTU đạt chuẩn kiểm định ABET (Mỹ) cho khối ngành nào đầu tiên?", opts: ["Công nghệ Thông tin", "Du lịch", "Y dược", "Kiến trúc", "Ngôn ngữ Anh", "Luật"], ans: "Công nghệ Thông tin" },
@@ -76,127 +227,94 @@
             { q: "Màu sắc truyền thống nhận diện thương hiệu DTU là màu gì?", opts: ["Đỏ đô", "Đỏ thẳm", "Đỏ", "Xanh lá", "Tím", "Cam"], ans: "Đỏ đô" }
         ];
 
-        const soundWin = new Audio('https://www.myinstants.com/media/sounds/tada.mp3');
-        let score = 0, currentIdx = 0, startTime, timerInterval;
-        let myQuestions = [];
+        let score = 0, currentIdx = 0, startTime, timerInterval, myQuestions = [];
 
-        function checkSystemStatus() {
-            const now = Date.now();
-            const btnStart = document.getElementById('btn-main-action');
-            const infoText = document.getElementById('user-info');
-            const nameInput = document.getElementById('fullname');
-
-            if (now < CONFIG.START_TIME) {
-                btnStart.disabled = true;
-                btnStart.innerText = "CHƯA ĐẾN GIỜ";
-                nameInput.style.display = "none";
-                let diff = CONFIG.START_TIME - now;
-                let m = Math.floor(diff / 60000);
-                let s = Math.floor((diff % 60000) / 1000);
-                infoText.innerText = `Hệ thống mở sau: ${m}p ${s}s`;
-            } 
-            else if (now > CONFIG.END_TIME) {
-                btnStart.disabled = true;
-                btnStart.innerText = "HẾT GIỜ";
-                nameInput.style.display = "none";
-                infoText.innerText = "Hẹn gặp bạn ở sự kiện sau!";
-            } 
-            else {
-                btnStart.disabled = false;
-                btnStart.innerText = "BẮT ĐẦU THI NGAY";
-                nameInput.style.display = "block";
-
-                let timeLeft = CONFIG.END_TIME - now;
-                let mLeft = Math.floor(timeLeft / 60000);
-                let sLeft = Math.floor((timeLeft % 60000) / 1000);
-
-                if (mLeft < 5) {
-                    infoText.style.color = "red";
-                    infoText.innerText = `⚠️ SẮP HẾT GIỜ! Còn ${mLeft}p ${sLeft}s.`;
-                } else if(!infoText.innerText.includes("Chào")) {
-                    infoText.innerText = tg.initDataUnsafe.user ? `Chào: ${tg.initDataUnsafe.user.first_name}` : "Hệ thống đã sẵn sàng!";
-                    infoText.style.color = "#666";
-                }
-            }
+        function formatName(input) {
+            let cursor = input.selectionStart;
+            input.value = input.value.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+            input.setSelectionRange(cursor, cursor);
         }
-        setInterval(checkSystemStatus, 1000);
+
+        function fixUsername(input) {
+            if (!input.value.startsWith("@")) input.value = "@" + input.value.replace(/@/g, "");
+            input.value = input.value.replace(/\s/g, "");
+        }
+
+        async function loadSystemConfig() {
+            try {
+                const res = await fetch(CONFIG.SCRIPT_URL);
+                const data = await res.json();
+                CONFIG.START_TIME = data.start; CONFIG.END_TIME = data.end;
+                initStatus();
+            } catch (e) { document.getElementById('system-msg').innerText = "Lỗi kết nối!"; }
+        }
+        loadSystemConfig();
+
+        function initStatus() {
+            const check = () => {
+                const now = Date.now();
+                const btn = document.getElementById('btn-main-action');
+                if (now < CONFIG.START_TIME) { btn.disabled = true; btn.innerText = "CHƯA ĐẾN GIỜ"; }
+                else if (now > CONFIG.END_TIME) { btn.disabled = true; btn.innerText = "HẾT GIỜ"; }
+                else { btn.disabled = false; btn.innerText = "BẮT ĐẦU"; }
+            };
+            check(); setInterval(check, 1000);
+        }
 
         function startApp() {
             const name = document.getElementById('fullname').value.trim();
-            if(!name) return alert("Vui lòng nhập họ tên!");
+            const mssv = document.getElementById('mssv').value.trim();
+            const uInput = document.getElementById('user_input').value.trim();
+            const provider = document.getElementById('provider').value;
+            if (!name || !mssv || uInput === "@" || !provider) return alert("Vui lòng nhập đủ!");
+
             myQuestions = [...BANK].sort(() => 0.5 - Math.random()).slice(0, CONFIG.NUM_QUESTIONS);
             document.getElementById('step-start').classList.add('hidden');
             document.getElementById('step-quiz').classList.remove('hidden');
+
             startTime = Date.now();
-            timerInterval = setInterval(() => {
-                document.getElementById('clock').innerText = ((Date.now() - startTime)/1000).toFixed(2) + "s";
-            }, 100);
+            timerInterval = setInterval(() => { document.getElementById('clock').innerText = ((Date.now() - startTime) / 1000).toFixed(2) + "s"; }, 100);
             render();
         }
 
         function render() {
             const item = myQuestions[currentIdx];
-            const shuffledOpts = [...item.opts].sort(() => 0.5 - Math.random());
-            let html = `<h3>Câu ${currentIdx + 1}/${myQuestions.length}: ${item.q}</h3>`;
-            shuffledOpts.forEach(o => {
-                html += `<label class="option"><input type="radio" name="quiz" value="${o}"> ${o}</label>`;
-            });
+            const opts = [...item.opts].sort(() => 0.5 - Math.random());
+            let html = `<h3>Câu ${currentIdx + 1}: ${item.q}</h3>`;
+            opts.forEach(o => { html += `<label class="option"><input type="radio" name="quiz" value="${o}"> <span>${o}</span></label>`; });
             document.getElementById('quiz-content').innerHTML = html;
         }
 
         function handleNext() {
-            const selected = document.querySelector('input[name="quiz"]:checked');
-            if(!selected) return alert("Chọn đáp án!");
-            if(selected.value === myQuestions[currentIdx].ans) score++;
-            if(currentIdx < myQuestions.length - 1) {
-                currentIdx++;
-                render();
-            } else {
-                submitFinal();
-            }
+            const sel = document.querySelector('input[name="quiz"]:checked');
+            if (!sel) return alert("Chọn đáp án!");
+            if (sel.value === myQuestions[currentIdx].ans) score++;
+            if (currentIdx < myQuestions.length - 1) { currentIdx++; render(); }
+            else { submit(); }
         }
 
-        async function submitFinal() {
+        async function submit() {
             clearInterval(timerInterval);
-            const btnNext = document.getElementById('btn-next');
-            btnNext.disabled = true;
-            btnNext.innerText = "ĐANG NỘP BÀI...";
-            
-            const timeUsed = ((Date.now() - startTime) / 1000).toFixed(2);
+            const btn = document.getElementById('btn-next');
+            btn.disabled = true; btn.innerText = "ĐANG NỘP...";
             const payload = {
                 userId: tg.initDataUnsafe.user?.id || "N/A",
-                username: tg.initDataUnsafe.user?.username || "N/A",
-                studentName: document.getElementById('fullname').value.toUpperCase(),
+                usernameSys: tg.initDataUnsafe.user?.username || "N/A",
+                usernameInput: document.getElementById('user_input').value,
+                studentName: document.getElementById('fullname').value,
+                mssv: document.getElementById('mssv').value,
+                provider: document.getElementById('provider').value,
                 score: score,
-                timeUsed: timeUsed
+                timeUsed: ((Date.now() - startTime) / 1000).toFixed(2)
             };
-
             try {
-                const response = await fetch(CONFIG.SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload) 
-                });
-                
-                const result = await response.json();
-
-                if (result.status === "duplicate") {
-                    alert("Bạn đã nộp bài trước đó rồi! Kết quả cũ vẫn được giữ lại.");
-                    tg.close();
-                    return;
-                }
-
-                soundWin.play();
-                confetti();
-                document.getElementById('step-quiz').classList.add('hidden');
-                document.getElementById('step-end').classList.remove('hidden');
-                
-            } catch(e) {
-                console.error(e);
-                alert("Lỗi kết nối! Vui lòng nhấn Thử lại để nộp bài.");
-                btnNext.disabled = false;
-                btnNext.innerText = "THỬ LẠI";
-            }
+                const res = await fetch(CONFIG.SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
+                if (result.status === "duplicate") { alert("Bạn đã nộp rồi!"); tg.close(); }
+                else { soundWin.play(); confetti(); document.getElementById('step-quiz').classList.add('hidden'); document.getElementById('step-end').classList.remove('hidden'); }
+            } catch (e) { alert("Lỗi nộp bài!"); btn.disabled = false; }
         }
     </script>
 </body>
+
 </html>
