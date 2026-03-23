@@ -79,32 +79,48 @@
         /* CÁC Ô LỰA CHỌN CÂU HỎI */
         .option {
             display: flex;
+            /* Kích hoạt hộp linh hoạt */
             align-items: center;
-            padding: 12px;
+            /* Căn giữa theo chiều dọc */
+            justify-content: flex-start;
+            /* ÉP TẤT CẢ VỀ BÊN TRÁI */
+            padding: 12px 15px;
             margin: 10px 0;
             background: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            /* Cố định cỡ chữ để không bị nhảy */
-            white-space: nowrap;
-            /* QUAN TRỌNG: Chống xuống dòng nội dung */
             width: 100%;
             box-sizing: border-box;
+            transition: 0.2s;
         }
 
-        .option span {
-            flex: 1;
-            /* Để text chiếm hết khoảng trống còn lại */
-            text-align: left;
-        }
-
-        .option input {
-            margin-right: 15px;
-            min-width: 20px;
-            min-height: 20px;
+        /* Khoảng cách cho nút tròn */
+        .option input[type="radio"] {
+            margin: 0 15px 0 0;
+            /* Cách chữ 15px bên phải */
+            width: 20px;
+            height: 20px;
             cursor: pointer;
+            flex-shrink: 0;
+            /* Không cho nút bị bóp méo */
+        }
+
+        /* Căn chỉnh nội dung chữ */
+        .option span {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.2;
+            text-align: left;
+            /* Chữ luôn canh trái */
+            flex: 1;
+            /* Chiếm hết phần còn lại */
+        }
+
+        /* Hiệu ứng khi di chuột hoặc chọn (Tùy chọn thêm cho đẹp) */
+        .option:active {
+            background: #f0f0f0;
+            transform: scale(0.98);
         }
 
         /* FORM NHẬP LIỆU */
@@ -293,7 +309,6 @@
             let html = `<h3>Câu ${currentIdx + 1}: ${item.q}</h3>`;
 
             opts.forEach(o => {
-                // Thêm thẻ <span> quanh nội dung đáp án ${o}
                 html += `<label class="option">
                     <input type="radio" name="quiz" value="${o}"> 
                     <span>${o}</span>
